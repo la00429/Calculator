@@ -45,7 +45,7 @@ public class Presenter {
                 connetion.send("Result: " + result);
             } while (!message.equals("5"));
         } catch (IOException e) {
-//            System.err.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 

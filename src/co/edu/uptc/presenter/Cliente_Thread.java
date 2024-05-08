@@ -2,6 +2,9 @@ package co.edu.uptc.presenter;
 
 import co.edu.uptc.model.Calculator;
 import co.edu.uptc.net.Connetion;
+import co.edu.uptc.net.Request;
+import co.edu.uptc.net.Responsive;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -27,31 +30,32 @@ public class Cliente_Thread extends Thread {
     }
 
     private void menuPrincipal() throws IOException {
-        String message = new String();
+        Gson gson = new Gson();
         double result = 0.0;
         establishConnection();
+        Request request;
         do {
-            message = connetion.receive();
-            Double[] parts = dataToDouble(message);
-            switch (Integer.toString(parts[0].intValue())) {
+            request = gson.fromJson(connetion.receive(), Request.class);
+            switch (request.getOperation()) {
                 case "1":
-                    result = calculator.sum(parts[1], parts[2]);
-                    connetion.send("Result: " + result);
+                    result = calculator.sum(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
+                    connetion.send(gson.toJson(result));
                     break;
                 case "2":
-                    result = calculator.rest(parts[1], parts[2]);
-                    connetion.send("Result: " + result);
+                    result = calculator.rest(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
+                    connetion.send(gson.toJson(result));
                     break;
                 case "3":
-                    result = calculator.multiply(parts[1], parts[2]);
-                    connetion.send("Result: " + result);
+                    result = calculator.multiply(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
+                    connetion.send(gson.toJson(result));
                     break;
                 case "4":
-                    result = calculator.divide(parts[1], parts[2]);
-                    connetion.send("Result: " + result);
+                    result = calculator.divide(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
+                    connetion.send(gson.toJson(result));
                     break;
                 case "5":
-                    connetion.send("Memory: " + calculator.getMemory());
+                    result = calculator.getMemory();
+                    connetion.send(gson.toJson(result));
                     break;
                 case "6":
                     closeConnection();
@@ -60,33 +64,26 @@ public class Cliente_Thread extends Thread {
                     optionNotValid();
                     break;
             }
-
-        } while (message != "6");
+        } while (!request.getOperation().equals("6"));
     }
 
     private void establishConnection() throws IOException {
         connetion.connect();
-        connetion.send("Conexión establecida con el servidor");
+        Gson gson = new Gson();
+        connetion.send(gson.toJson(new Responsive("0", "Connection established")));
         System.err.println(connetion.receive());
     }
 
-    private Double[] dataToDouble(String data) {
-        String[] parts = data.split(" ");
-        Double[] numbers = new Double[parts.length];
-        for (int i = 0; i < parts.length; i++) {
-            numbers[i] = Double.parseDouble(parts[i]);
-        }
-        return numbers;
-    }
-
     private void closeConnection() throws IOException {
-        connetion.send("Close connection");
+        Gson gson = new Gson();
+        connetion.send(gson.toJson(new Responsive("0", "Close connection")));
         connetion.disconnect();
         throw new IOException("Connection closed");
     }
 
     private void optionNotValid() throws IOException {
-        connetion.send("Invalid option");
+        Gson gson = new Gson();
+        connetion.send(gson.toJson(new Responsive("0", "Invalid option")));
     }
 
 }

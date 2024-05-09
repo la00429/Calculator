@@ -39,23 +39,23 @@ public class Cliente_Thread extends Thread {
             switch (request.getOperation()) {
                 case "1":
                     result = calculator.sum(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
-                    connetion.send(gson.toJson(result));
+                    connetion.send(new Gson().toJson(new Responsive(String.valueOf(result), "Operation performed successfully")));
                     break;
                 case "2":
                     result = calculator.rest(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
-                    connetion.send(gson.toJson(result));
+                    connetion.send(new Gson().toJson(new Responsive(String.valueOf(result), "Operation performed successfully")));
                     break;
                 case "3":
                     result = calculator.multiply(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
-                    connetion.send(gson.toJson(result));
+                    connetion.send(new Gson().toJson(new Responsive(String.valueOf(result), "Operation performed successfully")));
                     break;
                 case "4":
                     result = calculator.divide(Double.parseDouble(request.getNumber1()), Double.parseDouble(request.getNumber2()));
-                    connetion.send(gson.toJson(result));
+                    connetion.send(new Gson().toJson(new Responsive(String.valueOf(result), "Operation performed successfully")));
                     break;
                 case "5":
                     result = calculator.getMemory();
-                    connetion.send(gson.toJson(result));
+                    connetion.send(new Gson().toJson(new Responsive(String.valueOf(result), "Operation performed successfully")));
                     break;
                 case "6":
                     closeConnection();
@@ -71,12 +71,13 @@ public class Cliente_Thread extends Thread {
         connetion.connect();
         Gson gson = new Gson();
         connetion.send(gson.toJson(new Responsive("0", "Connection established")));
-        System.err.println(connetion.receive());
+        Responsive message = gson.fromJson(connetion.receive(), Responsive.class);
+        System.err.println(message.getMessage());
     }
 
     private void closeConnection() throws IOException {
         Gson gson = new Gson();
-        connetion.send(gson.toJson(new Responsive("0", "Close connection")));
+        connetion.send(gson.toJson(new Responsive("6", "Close connection")));
         connetion.disconnect();
         throw new IOException("Connection closed");
     }
